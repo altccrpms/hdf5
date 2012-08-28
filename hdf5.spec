@@ -1,8 +1,22 @@
+# AltCCRPMS
+%global _prefix /opt/%{name}/%{version}
+%global _sysconfdir %{_prefix}/etc
+
+%global _cc_name intel
+%global _cc_name_suffix -%{_cc_name}
+
+#We don't want to be beholden to the proprietary libraries
+%global    _use_internal_dependency_generator 0
+%global    __find_requires %{nil}
+
+# Non gcc compilers don't generate build ids
+%undefine _missing_build_ids_terminate_build
+
 %global snaprel %{nil}
 
 # NOTE:  Try not to realease new versions to released versions of Fedora
 # You need to recompile all users of HDF5 for each version change
-Name: hdf5
+Name: hdf5189%{?_cc_name_suffix}
 Version: 1.8.9
 Release: 2%{?dist}
 Summary: A general purpose library and file format for storing scientific data
@@ -11,16 +25,20 @@ Group: System Environment/Libraries
 URL: http://www.hdfgroup.org/HDF5/
 Source0: http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-%{version}%{?snaprel}.tar.bz2
 Source1: h5comp
+Source2: hdf5.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
 Patch1: hdf5-1.8.8-tstlite.patch
 # Fix typo bug in parallel h5diff
 Patch3: hdf5-ph5diff.patch
 
-BuildRequires: krb5-devel, openssl-devel, zlib-devel, gcc-gfortran, time
+BuildRequires: krb5-devel, openssl-devel, zlib-devel, time
 # Needed for mpi tests
 BuildRequires: openssh-clients
 
-%global with_mpich2 1
+# AltCCRPMS
+Requires:      environment-modules
+
+%global with_mpich2 0
 %global with_openmpi 1
 %if 0%{?rhel}
 %ifarch ppc64
@@ -133,7 +151,7 @@ HDF5 parallel openmpi static libraries
 
 %prep
 #setup -q -n %{name}-%{version}%{?snaprel}
-%setup -q
+%setup -q -n hdf5-%{version}
 %patch0 -p1 -b .LD_LIBRARY_PATH
 %ifarch ppc64 s390x
 # the tstlite test fails with "stack smashing detected" on these arches
@@ -160,10 +178,12 @@ find \( -name '*.[ch]*' -o -name '*.f90' -o -name '*.txt' \) -exec chmod -x {} +
 # --enable-cxx/fortran/parallel and --enable-threadsafe flags are incompatible
 
 #Serial build
-export CC=gcc
-export CXX=g++
-export F9X=gfortran
-export CFLAGS="${RPM_OPT_FLAGS/O2/O0}"
+export CC=icc
+export CXX=icpc
+export F9X=ifort
+export CFLAGS="-O3 -axSSE2,SSE4.1,SSE4.2"
+export CXXFLAGS="$CFLAGS"
+export FFLAGS="$CFLAGS -fPIC"
 mkdir build
 pushd build
 ln -s ../configure .
@@ -181,7 +201,7 @@ for mpi in %{mpi_list}
 do
   mkdir $mpi
   pushd $mpi
-  module load $mpi-%{_arch}
+  module load mpi/$mpi%{?_cc_name_suffix}
   ln -s ../configure .
   %configure \
     %{configure_opts} \
@@ -191,7 +211,7 @@ do
     --sbindir=%{_libdir}/$mpi/sbin \
     --includedir=%{_includedir}/$mpi-%{_arch} \
     --datarootdir=%{_libdir}/$mpi/share \
-    --mandir=%{_libdir}/$mpi/share/man \
+    --mandir=%{_libdir}/$mpi/share/man
   make
   module purge
   popd
@@ -203,7 +223,7 @@ make -C build install DESTDIR=${RPM_BUILD_ROOT}
 rm $RPM_BUILD_ROOT/%{_libdir}/*.la
 for mpi in %{mpi_list}
 do
-  module load $mpi-%{_arch}
+  module load mpi/$mpi%{?_cc_name_suffix}
   make -C $mpi install DESTDIR=${RPM_BUILD_ROOT}
   rm $RPM_BUILD_ROOT/%{_libdir}/$mpi/lib/*.la
   module purge
@@ -249,13 +269,24 @@ cat > ${RPM_BUILD_ROOT}%{_sysconfdir}/rpm/macros.hdf5 <<EOF
 %_hdf5_version	%{version}
 EOF
 
+# AltCCRPMS
+# Make the environment-modules file
+mkdir -p %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}
+# Since we're doing our own substitution here, use our own definitions.
+sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#'  < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
+for mpi in %{mpi_list}
+do
+  mkdir -p %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}-${mpi}
+  sed -e 's#@PREFIX@#'%{_prefix}/$mpi'#' -e 's#@LIB@#%{_lib}#'  < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}-${mpi}/%{version}-%{_arch}
+done
+
 
 %check
 make -C build check
 export HDF5_Make_Ignore=yes
 for mpi in %{mpi_list}
 do
-  module load $mpi-%{_arch}
+  module load mpi/$mpi%{?_cc_name_suffix}
   make -C $mpi check
   module purge
 done
@@ -270,6 +301,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
+/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -309,6 +341,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
+/etc/modulefiles/hdf5%{?_cc_name_suffix}-mpich2/%{version}-%{_arch}
 %{_libdir}/mpich2/bin/gif2h5
 %{_libdir}/mpich2/bin/h52gif
 %{_libdir}/mpich2/bin/h5copy
@@ -347,6 +380,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
+/etc/modulefiles/hdf5%{?_cc_name_suffix}-openmpi/%{version}-%{_arch}
 %{_libdir}/openmpi/bin/gif2h5
 %{_libdir}/openmpi/bin/h52gif
 %{_libdir}/openmpi/bin/h5copy
