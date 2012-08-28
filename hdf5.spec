@@ -2,7 +2,7 @@
 %global _prefix /opt/%{name}/%{version}
 %global _sysconfdir %{_prefix}/etc
 
-%global _cc_name intel
+%global _cc_name pgf
 %global _cc_name_suffix -%{_cc_name}
 
 #We don't want to be beholden to the proprietary libraries
@@ -178,12 +178,10 @@ find \( -name '*.[ch]*' -o -name '*.f90' -o -name '*.txt' \) -exec chmod -x {} +
 # --enable-cxx/fortran/parallel and --enable-threadsafe flags are incompatible
 
 #Serial build
-export CC=icc
-export CXX=icpc
-export F9X=ifort
-export CFLAGS="-O3 -axSSE2,SSE4.1,SSE4.2"
-export CXXFLAGS="$CFLAGS"
-export FFLAGS="$CFLAGS -fPIC"
+export CC=gcc
+export CXX=g++
+export F9X=pgf95
+export FFLAGS="-fastsse -fPIC"
 mkdir build
 pushd build
 ln -s ../configure .
