@@ -26,6 +26,7 @@ URL: http://www.hdfgroup.org/HDF5/
 Source0: http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-%{version}%{?snaprel}.tar.bz2
 Source1: h5comp
 Source2: hdf5.module.in
+Source3: hdf5-mpi.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
 Patch1: hdf5-1.8.8-tstlite.patch
 # Fix typo bug in parallel h5diff
@@ -273,11 +274,11 @@ EOF
 # Make the environment-modules file
 mkdir -p %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}
 # Since we're doing our own substitution here, use our own definitions.
-sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#'  < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
+sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
 for mpi in %{mpi_list}
 do
-  mkdir -p %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}-${mpi}
-  sed -e 's#@PREFIX@#'%{_prefix}/$mpi'#' -e 's#@LIB@#%{_lib}#'  < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}-${mpi}/%{version}-%{_arch}
+  mkdir -p %{buildroot}/etc/modulefiles/hdf5-${mpi}%{?_cc_name_suffix}
+  sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@MPI@#'$mpi'#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' < %SOURCE3 > %{buildroot}/etc/modulefiles/hdf5-${mpi}%{?_cc_name_suffix}/%{version}-%{_arch}
 done
 
 
@@ -301,7 +302,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
+/etc/modulefiles/hdf5%{?_cc_name_suffix}/
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -341,7 +342,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5%{?_cc_name_suffix}-mpich2/%{version}-%{_arch}
+/etc/modulefiles/hdf5-mpich2%{?_cc_name_suffix}/
 %{_libdir}/mpich2/bin/gif2h5
 %{_libdir}/mpich2/bin/h52gif
 %{_libdir}/mpich2/bin/h5copy
@@ -380,7 +381,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5%{?_cc_name_suffix}-openmpi/%{version}-%{_arch}
+/etc/modulefiles/hdf5-openmpi%{?_cc_name_suffix}/
 %{_libdir}/openmpi/bin/gif2h5
 %{_libdir}/openmpi/bin/h52gif
 %{_libdir}/openmpi/bin/h5copy
