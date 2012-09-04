@@ -12,11 +12,13 @@
 # Non gcc compilers don't generate build ids
 %undefine _missing_build_ids_terminate_build
 
+%global shortname hdf5
+
 %global snaprel %{nil}
 
 # NOTE:  Try not to realease new versions to released versions of Fedora
 # You need to recompile all users of HDF5 for each version change
-Name: hdf5189%{?_cc_name_suffix}
+Name: %{shortname}189%{?_cc_name_suffix}
 Version: 1.8.9
 Release: 2%{?dist}
 Summary: A general purpose library and file format for storing scientific data
@@ -37,6 +39,7 @@ BuildRequires: krb5-devel, openssl-devel, zlib-devel, time
 BuildRequires: openssh-clients
 
 # AltCCRPMS
+Provides:      %{shortname}%{?_cc_name_suffix} = %{version}-%{release}
 Requires:      environment-modules
 
 %global with_mpich2 0
@@ -74,6 +77,8 @@ Summary: HDF5 development files
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: zlib-devel
+# AltCCRPMS
+Provides: %{shortname}%{?_cc_name_suffix}-devel = %{version}-%{release}
 
 %description devel
 HDF5 development headers and libraries.
@@ -83,6 +88,8 @@ HDF5 development headers and libraries.
 Summary: HDF5 static libraries
 Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
+# AltCCRPMS
+Provides: %{shortname}%{?_cc_name_suffix}-static = %{version}-%{release}
 
 %description static
 HDF5 static libraries.
@@ -94,6 +101,8 @@ Summary: HDF5 mpich2 libraries
 Group: Development/Libraries
 Requires: mpich2
 BuildRequires: mpich2-devel
+# AltCCRPMS
+Provides: %{shortname}-mpich2%{?_cc_name_suffix} = %{version}-%{release}
 
 %description mpich2
 HDF5 parallel mpich2 libraries
@@ -104,6 +113,8 @@ Summary: HDF5 mpich2 development files
 Group: Development/Libraries
 Requires: %{name}-mpich2%{?_isa} = %{version}-%{release}
 Requires: mpich2
+# AltCCRPMS
+Provides: %{shortname}-mpich2%{?_cc_name_suffix}-devel = %{version}-%{release}
 
 %description mpich2-devel
 HDF5 parallel mpich2 development files
@@ -113,6 +124,8 @@ HDF5 parallel mpich2 development files
 Summary: HDF5 mpich2 static libraries
 Group: Development/Libraries
 Requires: %{name}-mpich2-devel%{?_isa} = %{version}-%{release}
+# AltCCRPMS
+Provides: %{shortname}-mpich2%{?_cc_name_suffix}-static = %{version}-%{release}
 
 %description mpich2-static
 HDF5 parallel mpich2 static libraries
@@ -125,6 +138,8 @@ Summary: HDF5 openmpi libraries
 Group: Development/Libraries
 Requires: openmpi
 BuildRequires: openmpi-devel
+# AltCCRPMS
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static = %{version}-%{release}
 
 %description openmpi
 HDF5 parallel openmpi libraries
@@ -135,6 +150,8 @@ Summary: HDF5 openmpi development files
 Group: Development/Libraries
 Requires: %{name}-openmpi%{_isa} = %{version}-%{release}
 Requires: openmpi-devel
+# AltCCRPMS
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-devel = %{version}-%{release}
 
 %description openmpi-devel
 HDF5 parallel openmpi development files
@@ -144,6 +161,8 @@ HDF5 parallel openmpi development files
 Summary: HDF5 openmpi static libraries
 Group: Development/Libraries
 Requires: %{name}-openmpi-devel%{?_isa} = %{version}-%{release}
+# AltCCRPMS
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static = %{version}-%{release}
 
 %description openmpi-static
 HDF5 parallel openmpi static libraries
@@ -152,7 +171,7 @@ HDF5 parallel openmpi static libraries
 
 %prep
 #setup -q -n %{name}-%{version}%{?snaprel}
-%setup -q -n hdf5-%{version}
+%setup -q -n %{shortname}-%{version}
 %patch0 -p1 -b .LD_LIBRARY_PATH
 %ifarch ppc64 s390x
 # the tstlite test fails with "stack smashing detected" on these arches
@@ -272,13 +291,13 @@ EOF
 
 # AltCCRPMS
 # Make the environment-modules file
-mkdir -p %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}
+mkdir -p %{buildroot}/etc/modulefiles/%{shortname}%{?_cc_name_suffix}
 # Since we're doing our own substitution here, use our own definitions.
-sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' < %SOURCE2 > %{buildroot}/etc/modulefiles/hdf5%{?_cc_name_suffix}/%{version}-%{_arch}
+sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' < %SOURCE2 > %{buildroot}/etc/modulefiles/%{shortname}%{?_cc_name_suffix}/%{version}-%{_arch}
 for mpi in %{mpi_list}
 do
-  mkdir -p %{buildroot}/etc/modulefiles/hdf5-${mpi}%{?_cc_name_suffix}
-  sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@MPI@#'$mpi'#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' < %SOURCE3 > %{buildroot}/etc/modulefiles/hdf5-${mpi}%{?_cc_name_suffix}/%{version}-%{_arch}
+  mkdir -p %{buildroot}/etc/modulefiles/%{shortname}-${mpi}%{?_cc_name_suffix}
+  sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@MPI@#'$mpi'#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' < %SOURCE3 > %{buildroot}/etc/modulefiles/%{shortname}-${mpi}%{?_cc_name_suffix}/%{version}-%{_arch}
 done
 
 
@@ -302,7 +321,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}%{?_cc_name_suffix}/
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -342,7 +361,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5-mpich2%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}-mpich2%{?_cc_name_suffix}/
 %{_libdir}/mpich2/bin/gif2h5
 %{_libdir}/mpich2/bin/h52gif
 %{_libdir}/mpich2/bin/h5copy
@@ -381,7 +400,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/hdf5-openmpi%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}-openmpi%{?_cc_name_suffix}/
 %{_libdir}/openmpi/bin/gif2h5
 %{_libdir}/openmpi/bin/h52gif
 %{_libdir}/openmpi/bin/h5copy
