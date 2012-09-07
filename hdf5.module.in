@@ -3,7 +3,13 @@
 #  hdf5 module for use with 'environment-modules' package:
 #
 conflict	hdf5
-prepend-path 	PATH 		@PREFIX@/bin
-prepend-path	MANPATH		@PREFIX@/share/man
-prepend-path 	LD_LIBRARY_PATH @PREFIX@/@LIB@
+
+prepend-path 			PATH 		@PREFIX@/bin
+prepend-path			MANPATH		@PREFIX@/share/man
+prepend-path 			LD_LIBRARY_PATH @PREFIX@/@LIB@
+prepend-path --delim " "	CPPFLAGS	@PREFIX@/include
+prepend-path --delim " "	LDFLAGS		@PREFIX@/@LIB@
+
 setenv		HDF5_HOME	@PREFIX@
+setenv		HDF5_INCLUDE	@PREFIX@/include
+setenv		HDF5_LIB	@PREFIX@/@LIB@

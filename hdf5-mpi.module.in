@@ -4,9 +4,13 @@
 #
 conflict	hdf5
 module load	mpi/@MPI@-@CC@
-prepend-path 	PATH 		@PREFIX@/@LIB@/@MPI@/bin
-prepend-path	MANPATH		@PREFIX@/share/man
-prepend-path 	LD_LIBRARY_PATH @PREFIX@/@LIB@/@MPI@/lib
+
+prepend-path		 	PATH 		@PREFIX@/@LIB@/@MPI@/bin
+prepend-path			MANPATH		@PREFIX@/share/man
+prepend-path 			LD_LIBRARY_PATH @PREFIX@/@LIB@/@MPI@/lib
+prepend-path --delim " "	CPPFLAGS	@PREFIX@/include/@MPI@-@ARCH@
+prepend-path --delim " "	LDFLAGS		@PREFIX@/@LIB@/@MPI@/lib
+
 setenv		HDF5_HOME	@PREFIX@
 setenv		HDF5_INCLUDE	@PREFIX@/include/@MPI@-@ARCH@
 setenv		HDF5_LIB	@PREFIX@/@LIB@/@MPI@/lib

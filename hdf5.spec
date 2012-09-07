@@ -201,7 +201,7 @@ find \( -name '*.[ch]*' -o -name '*.f90' -o -name '*.txt' \) -exec chmod -x {} +
 export CC=gcc
 export CXX=g++
 export F9X=pgf95
-export FFLAGS="-fastsse -fPIC"
+export FFLAGS="-g -fastsse -fPIC"
 mkdir build
 pushd build
 ln -s ../configure .
