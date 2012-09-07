@@ -201,7 +201,7 @@ find \( -name '*.[ch]*' -o -name '*.f90' -o -name '*.txt' \) -exec chmod -x {} +
 export CC=icc
 export CXX=icpc
 export F9X=ifort
-export CFLAGS="-O3 -axSSE2,SSE4.1,SSE4.2"
+export CFLAGS="-g -O3 -axSSE2,SSE4.1,SSE4.2"
 export CXXFLAGS="$CFLAGS"
 export FFLAGS="$CFLAGS -fPIC"
 mkdir build
