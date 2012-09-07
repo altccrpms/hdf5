@@ -3,7 +3,7 @@
 #  hdf5 mpi module for use with 'environment-modules' package:
 #
 conflict	hdf5
-prereq		mpi/@MPI@-@CC@
+module load	mpi/@MPI@-@CC@
 prepend-path 	PATH 		@PREFIX@/@LIB@/@MPI@/bin
 prepend-path	MANPATH		@PREFIX@/share/man
 prepend-path 	LD_LIBRARY_PATH @PREFIX@/@LIB@/@MPI@/lib

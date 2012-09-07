@@ -291,13 +291,15 @@ EOF
 
 # AltCCRPMS
 # Make the environment-modules file
-mkdir -p %{buildroot}/etc/modulefiles/%{shortname}%{?_cc_name_suffix}
+mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}
 # Since we're doing our own substitution here, use our own definitions.
-sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' < %SOURCE2 > %{buildroot}/etc/modulefiles/%{shortname}%{?_cc_name_suffix}/%{version}-%{_arch}
+sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' \
+    < %SOURCE2 > %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}/%{version}-%{_arch}
 for mpi in %{mpi_list}
 do
-  mkdir -p %{buildroot}/etc/modulefiles/%{shortname}-${mpi}%{?_cc_name_suffix}
-  sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@MPI@#'$mpi'#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' < %SOURCE3 > %{buildroot}/etc/modulefiles/%{shortname}-${mpi}%{?_cc_name_suffix}/%{version}-%{_arch}
+mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}
+sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#'  -e 's#@MPI@#'$mpi'#' \
+    < %SOURCE3 > %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}/%{version}-%{_arch}
 done
 
 
@@ -321,7 +323,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/%{shortname}%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}/%{_cc_name}/
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -361,7 +363,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/%{shortname}-mpich2%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}/mpich2%{?_cc_name_suffix}/
 %{_libdir}/mpich2/bin/gif2h5
 %{_libdir}/mpich2/bin/h52gif
 %{_libdir}/mpich2/bin/h5copy
@@ -400,7 +402,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/%{shortname}-openmpi%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}/openmpi%{?_cc_name_suffix}/
 %{_libdir}/openmpi/bin/gif2h5
 %{_libdir}/openmpi/bin/h52gif
 %{_libdir}/openmpi/bin/h5copy
