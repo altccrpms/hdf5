@@ -145,8 +145,8 @@ Group: Development/Libraries
 BuildRequires: openmpi-devel
 # AltCCRPMS
 Requires: openmpi%{?_cc_name_suffix}%{?_isa}
-Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static = %{version}-%{release}
-Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static%{?_isa} = %{version}-%{release}
+Provides: %{shortname}-openmpi%{?_cc_name_suffix} = %{version}-%{release}
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}%{?_isa} = %{version}-%{release}
 
 %description openmpi
 HDF5 parallel openmpi libraries
