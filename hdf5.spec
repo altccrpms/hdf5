@@ -39,8 +39,9 @@ BuildRequires: krb5-devel, openssl-devel, zlib-devel, time
 BuildRequires: openssh-clients
 
 # AltCCRPMS
-Provides:      %{shortname}%{?_cc_name_suffix} = %{version}-%{release}
 Requires:      environment-modules
+Provides:      %{shortname}%{?_cc_name_suffix} = %{version}-%{release}
+Provides:      %{shortname}%{?_cc_name_suffix}%{?_isa} = %{version}-%{release}
 
 %global with_mpich2 0
 %global with_openmpi 1
@@ -79,6 +80,7 @@ Requires: %{name} = %{version}-%{release}
 Requires: zlib-devel
 # AltCCRPMS
 Provides: %{shortname}%{?_cc_name_suffix}-devel = %{version}-%{release}
+Provides: %{shortname}%{?_cc_name_suffix}-devel%{?_isa} = %{version}-%{release}
 
 %description devel
 HDF5 development headers and libraries.
@@ -90,6 +92,7 @@ Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
 # AltCCRPMS
 Provides: %{shortname}%{?_cc_name_suffix}-static = %{version}-%{release}
+Provides: %{shortname}%{?_cc_name_suffix}-static%{?_isa} = %{version}-%{release}
 
 %description static
 HDF5 static libraries.
@@ -99,10 +102,11 @@ HDF5 static libraries.
 %package mpich2
 Summary: HDF5 mpich2 libraries
 Group: Development/Libraries
-Requires: mpich2
 BuildRequires: mpich2-devel
 # AltCCRPMS
+Requires: mpich2%{?_cc_name_suffix}%{?_isa}
 Provides: %{shortname}-mpich2%{?_cc_name_suffix} = %{version}-%{release}
+Provides: %{shortname}-mpich2%{?_cc_name_suffix}%{?_isa} = %{version}-%{release}
 
 %description mpich2
 HDF5 parallel mpich2 libraries
@@ -112,9 +116,10 @@ HDF5 parallel mpich2 libraries
 Summary: HDF5 mpich2 development files
 Group: Development/Libraries
 Requires: %{name}-mpich2%{?_isa} = %{version}-%{release}
-Requires: mpich2
 # AltCCRPMS
+Requires: mpich2%{?_cc_name_suffix}%{?_isa}
 Provides: %{shortname}-mpich2%{?_cc_name_suffix}-devel = %{version}-%{release}
+Provides: %{shortname}-mpich2%{?_cc_name_suffix}-devel%{?_isa} = %{version}-%{release}
 
 %description mpich2-devel
 HDF5 parallel mpich2 development files
@@ -126,6 +131,7 @@ Group: Development/Libraries
 Requires: %{name}-mpich2-devel%{?_isa} = %{version}-%{release}
 # AltCCRPMS
 Provides: %{shortname}-mpich2%{?_cc_name_suffix}-static = %{version}-%{release}
+Provides: %{shortname}-mpich2%{?_cc_name_suffix}-static%{?_isa} = %{version}-%{release}
 
 %description mpich2-static
 HDF5 parallel mpich2 static libraries
@@ -136,10 +142,11 @@ HDF5 parallel mpich2 static libraries
 %package openmpi
 Summary: HDF5 openmpi libraries
 Group: Development/Libraries
-Requires: openmpi
 BuildRequires: openmpi-devel
 # AltCCRPMS
+Requires: openmpi%{?_cc_name_suffix}%{?_isa}
 Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static = %{version}-%{release}
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static%{?_isa} = %{version}-%{release}
 
 %description openmpi
 HDF5 parallel openmpi libraries
@@ -149,9 +156,10 @@ HDF5 parallel openmpi libraries
 Summary: HDF5 openmpi development files
 Group: Development/Libraries
 Requires: %{name}-openmpi%{_isa} = %{version}-%{release}
-Requires: openmpi-devel
 # AltCCRPMS
+Requires: openmpi%{?_cc_name_suffix}-devel%{?_isa}
 Provides: %{shortname}-openmpi%{?_cc_name_suffix}-devel = %{version}-%{release}
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-devel%{?_isa} = %{version}-%{release}
 
 %description openmpi-devel
 HDF5 parallel openmpi development files
@@ -163,6 +171,7 @@ Group: Development/Libraries
 Requires: %{name}-openmpi-devel%{?_isa} = %{version}-%{release}
 # AltCCRPMS
 Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static = %{version}-%{release}
+Provides: %{shortname}-openmpi%{?_cc_name_suffix}-static%{?_isa} = %{version}-%{release}
 
 %description openmpi-static
 HDF5 parallel openmpi static libraries
@@ -291,15 +300,15 @@ EOF
 
 # AltCCRPMS
 # Make the environment-modules file
-mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}
+mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}/%{version}
 # Since we're doing our own substitution here, use our own definitions.
 sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#' \
-    < %SOURCE2 > %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}/%{version}-%{_arch}
+    < %SOURCE2 > %{buildroot}/etc/modulefiles/%{shortname}/%{_cc_name}/%{version}/%{_arch}
 for mpi in %{mpi_list}
 do
-mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}
+mkdir -p %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}/%{version}
 sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' -e 's#@ARCH@#%{_arch}#' -e 's#@CC@#%{_cc_name}#'  -e 's#@MPI@#'$mpi'#' \
-    < %SOURCE3 > %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}/%{version}-%{_arch}
+    < %SOURCE3 > %{buildroot}/etc/modulefiles/%{shortname}/${mpi}-%{_cc_name}/%{version}/%{_arch}
 done
 
 
@@ -363,7 +372,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/%{shortname}/mpich2%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}/mpich2-%{_cc_name}/
 %{_libdir}/mpich2/bin/gif2h5
 %{_libdir}/mpich2/bin/h52gif
 %{_libdir}/mpich2/bin/h5copy
@@ -402,7 +411,7 @@ done
 %defattr(-,root,root,-)
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-/etc/modulefiles/%{shortname}/openmpi%{?_cc_name_suffix}/
+/etc/modulefiles/%{shortname}/openmpi-%{_cc_name}/
 %{_libdir}/openmpi/bin/gif2h5
 %{_libdir}/openmpi/bin/h52gif
 %{_libdir}/openmpi/bin/h5copy
