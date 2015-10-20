@@ -1,19 +1,7 @@
-diff -up hdf5-1.8.8/configure.LD_LIBRARY_PATH hdf5-1.8.8/configure
---- hdf5-1.8.8/configure.LD_LIBRARY_PATH	2011-11-16 11:21:54.511269486 -0700
-+++ hdf5-1.8.8/configure	2011-11-16 11:28:18.673392600 -0700
-@@ -26746,8 +26746,6 @@ $as_echo_n "checking how to print long l
- if ${hdf5_cv_printf_ll+:} false; then :
-   $as_echo_n "(cached) " >&6
- else
--  LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $AM_LDFLAGS $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
--export LD_LIBRARY_PATH
- 
- for hdf5_cv_printf_ll in l ll L q unknown; do
-    if test "$cross_compiling" = yes; then :
-diff -up hdf5-1.8.8/src/Makefile.in.LD_LIBRARY_PATH hdf5-1.8.8/src/Makefile.in
---- hdf5-1.8.8/src/Makefile.in.LD_LIBRARY_PATH	2011-11-15 08:13:54.000000000 -0700
-+++ hdf5-1.8.8/src/Makefile.in	2011-11-16 11:43:42.938914069 -0700
-@@ -1267,8 +1267,6 @@ help:
+diff -up hdf5-1.8.13/src/Makefile.am.LD_LIBRARY_PATH hdf5-1.8.13/src/Makefile.am
+--- hdf5-1.8.13/src/Makefile.am.LD_LIBRARY_PATH	2014-05-05 20:13:01.000000000 -0600
++++ hdf5-1.8.13/src/Makefile.am	2014-05-15 09:53:59.569476295 -0600
+@@ -128,8 +128,6 @@ settings_DATA=libhdf5.settings
  # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
  # is set to ignore the error.
  H5Tinit.c: H5detect$(EXEEXT)
@@ -22,7 +10,7 @@ diff -up hdf5-1.8.8/src/Makefile.in.LD_LIBRARY_PATH hdf5-1.8.8/src/Makefile.in
  	$(RUNSERIAL) ./H5detect$(EXEEXT) > $@  ||                               \
  	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
  	    ($(RM) $@ ; exit 1)
-@@ -1279,8 +1277,6 @@ H5Tinit.c: H5detect$(EXEEXT)
+@@ -140,8 +138,6 @@ H5Tinit.c: H5detect$(EXEEXT)
  # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
  # is set to ignore the error.
  H5lib_settings.c: H5make_libsettings$(EXEEXT) libhdf5.settings

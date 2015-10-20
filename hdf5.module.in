@@ -7,3 +7,5 @@ prepend-path 	PATH 		@PREFIX@/bin
 prepend-path	MANPATH		@PREFIX@/share/man
 prepend-path 	LD_LIBRARY_PATH @PREFIX@/@LIB@
 setenv		HDF5_HOME	@PREFIX@
+setenv		HDF5_INCLUDE	@PREFIX@/include
+setenv		HDF5_LIB	@PREFIX@/@LIB@
