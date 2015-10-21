@@ -13,12 +13,12 @@
 %global _mpi_name_ver %{_mpi_name}-%{_mpi_version}
 %global _name_suffix -%{_cc_name}-%{_mpi_name}
 %global _name_ver_suffix -%{_cc_name_ver}-%{_mpi_name_ver}
-%global _prefix /opt/%{_cc_name_ver}/%{_mpi_name_ver}/%{shortname}/%{version}
+%global _prefix /opt/%{_cc_name_ver}/%{_mpi_name_ver}/%{shortname}-%{version}
 %global _modulefiledir /opt/modulefiles/MPI/%{_cc_name}/%{_cc_version}/%{_mpi_name}/%{_mpi_version}/%{shortname}
 %else
 %global _name_suffix -%{_cc_name}
 %global _name_ver_suffix -%{_cc_name_ver}
-%global _prefix /opt/%{_cc_name_ver}/%{shortname}/%{version}
+%global _prefix /opt/%{_cc_name_ver}/%{shortname}-%{version}
 %global _modulefiledir /opt/modulefiles/Compiler/%{_cc_name}/%{_cc_version}/%{shortname}
 %endif
 %global _sysconfdir %{_prefix}/etc
@@ -52,7 +52,6 @@ Source1: h5comp
 # For man pages
 Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.14+docs-3.debian.tar.xz
 Source3: hdf5.module.in
-Source4: hdf5-mpi.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
 # Fix -Werror=format-security errors
 Patch2: hdf5-format.patch
@@ -69,6 +68,9 @@ BuildRequires: openssh-clients
 
 # AltCCRPMS
 Requires:      environment(modules)
+%if 0%{?_with_mpi}
+Requires:       %{_mpi_name}-%{_cc_name}%{?_isa}
+%endif
 Provides:       %{shortname}%{_name_suffix} = %{version}-%{release}
 Provides:       %{shortname}%{_name_suffix}%{?_isa} = %{version}-%{release}
 
@@ -88,6 +90,9 @@ Summary: HDF5 development files
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: zlib-devel
+%if 0%{?_with_mpi}
+Requires: %{_mpi_name}-%{_cc_name}-devel%{?_isa}
+%endif
 Provides: %{shortname}%{_name_suffix}-devel = %{version}-%{release}
 Provides: %{shortname}%{_name_suffix}-devel%{?_isa} = %{version}-%{release}
 
@@ -99,6 +104,9 @@ HDF5 development headers and libraries.
 Summary: HDF5 static libraries
 Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
+%if 0%{?_with_mpi}
+Requires: %{_mpi_name}-%{_cc_name}-devel%{?_isa}
+%endif
 Provides: %{shortname}%{_name_suffix}-static = %{version}-%{release}
 Provides: %{shortname}%{_name_suffix}-static%{?_isa} = %{version}-%{release}
 
@@ -135,10 +143,6 @@ pushd build
 ln -s ../configure .
 %if !0%{?_with_mpi}
 #Serial build
-export CC=icc
-export CXX=icpc
-export F9X=ifort
-export FC=ifort
 %configure \
   %{configure_opts} \
   --enable-cxx
@@ -160,9 +164,6 @@ popd
 %install
 make -C build install DESTDIR=${RPM_BUILD_ROOT}
 rm $RPM_BUILD_ROOT/%{_libdir}/*.la
-#Fortran modules
-mkdir -p ${RPM_BUILD_ROOT}%{_fmoddir}
-mv ${RPM_BUILD_ROOT}%{_includedir}/*.mod ${RPM_BUILD_ROOT}%{_fmoddir}
 #Fixup example permissions
 find ${RPM_BUILD_ROOT}%{_datadir} \( -name '*.[ch]*' -o -name '*.f90' \) -exec chmod -x {} +
 
@@ -191,6 +192,11 @@ make -C build check || :
 %files
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
+%dir %{_prefix}
+%dir %{_bindir}
+%dir %{_libdir}
+%dir %{_mandir}
+%dir %{_mandir}/man1
 %{_modulefiledir}
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
@@ -207,6 +213,10 @@ make -C build check || :
 %{_bindir}/h5repart
 %{_bindir}/h5stat
 %{_bindir}/h5unjam
+%if 0%{?_with_mpi}
+%{_bindir}/h5perf
+%{_bindir}/ph5diff
+%endif
 %{_libdir}/*.so.10*
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
@@ -224,23 +234,26 @@ make -C build check || :
 %{_mandir}/man1/h5unjam.1*
 
 %files devel
-%if !0%{?_with_mpi}
+%dir %{_includedir}
+%dir %{_datadir}
+%if 0%{?_with_mpi}
+%{_bindir}/h5pcc*
+%{_bindir}/h5pfc*
+%else
 %{_bindir}/h5c++*
-%endif
 %{_bindir}/h5cc*
 %{_bindir}/h5fc*
+%endif
 %{_bindir}/h5redeploy
 %{_includedir}/*.h
+%{_includedir}/*.mod
 %{_libdir}/*.so
 %{_libdir}/*.settings
-%{_fmoddir}/*.mod
 %{_datadir}/hdf5_examples/
-%if !0%{?_with_mpi}
 %{_mandir}/man1/h5c++.1*
-%endif
 %{_mandir}/man1/h5cc.1*
-%{_mandir}/man1/h5debug.1*
 %{_mandir}/man1/h5fc.1*
+%{_mandir}/man1/h5debug.1*
 %{_mandir}/man1/h5redeploy.1*
 
 %files static
