@@ -35,13 +35,13 @@
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
 # Patch version?
-%global snaprel -patch1
+%global snaprel %{nil}
 
 # NOTE:  Try not to release new versions to released versions of Fedora
 # You need to recompile all users of HDF5 for each version change
-Name: hdf5-1.8.15%{_name_ver_suffix}
-Version: 1.8.15
-Release: 8.patch1%{?dist}
+Name: hdf5-1.8.16%{_name_ver_suffix}
+Version: 1.8.16
+Release: 1%{?dist}
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
 Group: System Environment/Libraries
@@ -50,7 +50,7 @@ URL: http://www.hdfgroup.org/HDF5/
 Source0: http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-%{version}%{?snaprel}/src/hdf5-%{version}%{?snaprel}.tar.bz2
 Source1: h5comp
 # For man pages
-Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.14+docs-3.debian.tar.xz
+Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.15-patch1+docs-5.debian.tar.xz
 Source3: hdf5.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
 # Fix -Werror=format-security errors
@@ -218,6 +218,7 @@ make -C build check || :
 %{_bindir}/ph5diff
 %endif
 %{_libdir}/*.so.10*
+%{_libdir}/libhdf5_*cpp.so.11*
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
 %{_mandir}/man1/h5copy.1*
@@ -261,6 +262,12 @@ make -C build check || :
 
 
 %changelog
+* Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.16
+- Update to 1.8.16
+
+* Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-9.patch1
+- Use MPI_FORTRAN_MOD_DIR to locate MPI Fortran module
+ 
 * Fri Sep 25 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1
 - Force shared by default for compiler wrappers (bug #1266645)
 
