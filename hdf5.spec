@@ -23,10 +23,6 @@
 %endif
 %global _sysconfdir %{_prefix}/etc
 
-#We don't want to be beholden to the proprietary libraries
-%global    _use_internal_dependency_generator 0
-%global    __find_requires %{nil}
-
 # Non gcc compilers don't generate build ids
 %undefine _missing_build_ids_terminate_build
 
@@ -41,7 +37,7 @@
 # You need to recompile all users of HDF5 for each version change
 Name: hdf5-1.8.16%{_name_ver_suffix}
 Version: 1.8.16
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
 Group: System Environment/Libraries
@@ -218,7 +214,9 @@ make -C build check || :
 %{_bindir}/ph5diff
 %endif
 %{_libdir}/*.so.10*
+%if !0%{?_with_mpi}
 %{_libdir}/libhdf5_*cpp.so.11*
+%endif
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
 %{_mandir}/man1/h5copy.1*
@@ -262,7 +260,11 @@ make -C build check || :
 
 
 %changelog
-* Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.16
+* Tue Dec 22 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-1.1
+- Use rpm-opt-hooks for dependency handling
+- Fix files for mpi build
+
+* Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-1
 - Update to 1.8.16
 
 * Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-9.patch1
