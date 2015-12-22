@@ -23,10 +23,6 @@
 %endif
 %global _sysconfdir %{_prefix}/etc
 
-#We don't want to be beholden to the proprietary libraries
-%global    _use_internal_dependency_generator 0
-%global    __find_requires %{nil}
-
 # Non gcc compilers don't generate build ids
 %undefine _missing_build_ids_terminate_build
 
@@ -41,7 +37,7 @@
 # You need to recompile all users of HDF5 for each version change
 Name: hdf5-1.8.15%{_name_ver_suffix}
 Version: 1.8.15
-Release: 8.patch1%{?dist}
+Release: 8.patch1%{?dist}.1
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
 Group: System Environment/Libraries
@@ -217,7 +213,9 @@ make -C build check || :
 %{_bindir}/h5perf
 %{_bindir}/ph5diff
 %endif
+%if !0%{?_with_mpi}
 %{_libdir}/*.so.10*
+%endif
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
 %{_mandir}/man1/h5copy.1*
@@ -261,6 +259,10 @@ make -C build check || :
 
 
 %changelog
+* Wed Mar 2 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1.1
+- Use rpm-opt-hooks for dependency handling
+- Fix files for mpi build
+
 * Fri Sep 25 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1
 - Force shared by default for compiler wrappers (bug #1266645)
 
