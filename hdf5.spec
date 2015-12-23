@@ -63,12 +63,11 @@ BuildRequires: libtool
 BuildRequires: openssh-clients
 
 # AltCCRPMS
-Requires:      environment(modules)
-%if 0%{?_with_mpi}
-Requires:       %{_mpi_name}-%{_cc_name}%{?_isa}
-%endif
+Requires:       environment(modules)
 Provides:       %{shortname}%{_name_suffix} = %{version}-%{release}
 Provides:       %{shortname}%{_name_suffix}%{?_isa} = %{version}-%{release}
+Provides:       %{shortname}%{_name_ver_suffix} = %{version}-%{release}
+Provides:       %{shortname}%{_name_ver_suffix}%{?_isa} = %{version}-%{release}
 
 
 %description
@@ -84,13 +83,14 @@ grids. You can also mix and match them in HDF5 files according to your needs.
 %package devel
 Summary: HDF5 development files
 Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
 Requires: zlib-devel
 %if 0%{?_with_mpi}
-Requires: %{_mpi_name}-%{_cc_name}-devel%{?_isa}
+Requires: %{_mpi_name_ver}-%{_cc_name_ver}-devel%{?_isa}
 %endif
 Provides: %{shortname}%{_name_suffix}-devel = %{version}-%{release}
 Provides: %{shortname}%{_name_suffix}-devel%{?_isa} = %{version}-%{release}
+Provides: %{shortname}%{_name_ver_suffix}-devel = %{version}-%{release}
+Provides: %{shortname}%{_name_ver_suffix}-devel%{?_isa} = %{version}-%{release}
 
 %description devel
 HDF5 development headers and libraries.
@@ -101,10 +101,12 @@ Summary: HDF5 static libraries
 Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
 %if 0%{?_with_mpi}
-Requires: %{_mpi_name}-%{_cc_name}-devel%{?_isa}
+Requires: %{_mpi_name_ver}-%{_cc_name_ver}-devel%{?_isa}
 %endif
 Provides: %{shortname}%{_name_suffix}-static = %{version}-%{release}
 Provides: %{shortname}%{_name_suffix}-static%{?_isa} = %{version}-%{release}
+Provides: %{shortname}%{_name_ver_suffix}-static = %{version}-%{release}
+Provides: %{shortname}%{_name_ver_suffix}-static%{?_isa} = %{version}-%{release}
 
 %description static
 HDF5 static libraries.
@@ -213,9 +215,7 @@ make -C build check || :
 %{_bindir}/h5perf
 %{_bindir}/ph5diff
 %endif
-%if !0%{?_with_mpi}
 %{_libdir}/*.so.10*
-%endif
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
 %{_mandir}/man1/h5copy.1*
@@ -261,7 +261,6 @@ make -C build check || :
 %changelog
 * Wed Mar 2 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1.1
 - Use rpm-opt-hooks for dependency handling
-- Fix files for mpi build
 
 * Fri Sep 25 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1
 - Force shared by default for compiler wrappers (bug #1266645)
