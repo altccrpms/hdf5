@@ -35,9 +35,9 @@
 
 # NOTE:  Try not to release new versions to released versions of Fedora
 # You need to recompile all users of HDF5 for each version change
-Name: hdf5-1.8.16%{_name_ver_suffix}
-Version: 1.8.16
-Release: 1%{?dist}.1
+Name: hdf5-1.8.17%{_name_ver_suffix}
+Version: 1.8.17
+Release: 1%{?dist}
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
 Group: System Environment/Libraries
@@ -46,11 +46,11 @@ URL: http://www.hdfgroup.org/HDF5/
 Source0: http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-%{version}%{?snaprel}/src/hdf5-%{version}%{?snaprel}.tar.bz2
 Source1: h5comp
 # For man pages
-Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.15-patch1+docs-5.debian.tar.xz
+Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.16+docs-8.debian.tar.xz
 Source3: hdf5.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
-# Fix -Werror=format-security errors
-Patch2: hdf5-format.patch
+# Properly run MPI_Finalize() in t_pflush1
+Patch1: hdf5-mpi.patch
 # Fix long double conversions on ppc64le
 # https://bugzilla.redhat.com/show_bug.cgi?id=1078173
 Patch3: hdf5-ldouble-ppc64le.patch
@@ -115,7 +115,7 @@ HDF5 static libraries.
 %prep
 %setup -q -a 2 -n hdf5-%{version}%{?snaprel}
 %patch0 -p1 -b .LD_LIBRARY_PATH
-%patch2 -p1 -b .format
+%patch1 -p1 -b .mpi
 %patch3 -p1 -b .ldouble-ppc64le
 # Force shared by default for compiler wrappers (bug #1266645)
 sed -i -e '/^STATIC_AVAILABLE=/s/=.*/=no/' */*/h5[cf]*.in
@@ -217,7 +217,7 @@ make -C build check || :
 %endif
 %{_libdir}/*.so.10*
 %if !0%{?_with_mpi}
-%{_libdir}/libhdf5_*cpp.so.11*
+%{_libdir}/libhdf5_*cpp.so.12*
 %endif
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
@@ -262,6 +262,18 @@ make -C build check || :
 
 
 %changelog
+* Fri May 13 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.17-1
+- Update to 1.8.17
+
+* Sun Mar 20 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-4
+- Add patch to properly call MPI_Finalize() in t_pflush1
+
+* Wed Mar 2 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-3
+- Make hdf5-mpich-devel require mpich-devel (bug #1314091)
+
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.16-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Tue Dec 22 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-1.1
 - Use rpm-opt-hooks for dependency handling
 - Fix files for mpi build
