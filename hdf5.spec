@@ -217,7 +217,8 @@ make -C build check || :
 %endif
 %{_libdir}/*.so.10*
 %if !0%{?_with_mpi}
-%{_libdir}/libhdf5_*cpp.so.12*
+%{_libdir}/libhdf5_cpp.so.12*
+%{_libdir}/libhdf5_hl_cpp.so.11*
 %endif
 %{_mandir}/man1/gif2h5.1*
 %{_mandir}/man1/h52gif.1*
