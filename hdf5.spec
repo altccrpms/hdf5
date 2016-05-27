@@ -1,32 +1,6 @@
-# AltCCRPMS
-%global _cc_name %{getenv:COMPILER_NAME}
-%global _cc_version %{getenv:COMPILER_VERSION}
-%global _cc_name_ver %{_cc_name}-%{_cc_version}
-%global _mpi_name %{getenv:MPI_NAME}
-%if "%{_mpi_name}" == ""
-%global _with_mpi 0
-%else
-%global _with_mpi 1
-%endif
-%if 0%{?_with_mpi}
-%global _mpi_version %{getenv:MPI_VERSION}
-%global _mpi_name_ver %{_mpi_name}-%{_mpi_version}
-%global _name_suffix -%{_cc_name}-%{_mpi_name}
-%global _name_ver_suffix -%{_cc_name_ver}-%{_mpi_name_ver}
-%global _prefix /opt/%{_cc_name_ver}/%{_mpi_name_ver}/%{shortname}-%{version}
-%global _modulefiledir /opt/modulefiles/MPI/%{_cc_name}/%{_cc_version}/%{_mpi_name}/%{_mpi_version}/%{shortname}
-%else
-%global _name_suffix -%{_cc_name}
-%global _name_ver_suffix -%{_cc_name_ver}
-%global _prefix /opt/%{_cc_name_ver}/%{shortname}-%{version}
-%global _modulefiledir /opt/modulefiles/Compiler/%{_cc_name}/%{_cc_version}/%{shortname}
-%endif
-%global _sysconfdir %{_prefix}/etc
-
-# Non gcc compilers don't generate build ids
-%undefine _missing_build_ids_terminate_build
-
 %global shortname hdf5
+%global ver 1.8.17
+%{?altcc_init:%altcc_init -n %{shortname} -v %{ver}}
 
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
@@ -35,8 +9,8 @@
 
 # NOTE:  Try not to release new versions to released versions of Fedora
 # You need to recompile all users of HDF5 for each version change
-Name: hdf5-1.8.17%{_name_ver_suffix}
-Version: 1.8.17
+Name: hdf5%{?altcc_pkg_suffix}
+Version: %{ver}
 Release: 1%{?dist}
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
@@ -62,12 +36,8 @@ BuildRequires: libtool
 # Needed for mpi tests
 BuildRequires: openssh-clients
 
-# AltCCRPMS
-Requires:       environment(modules)
-Provides:       %{shortname}%{_name_suffix} = %{version}-%{release}
-Provides:       %{shortname}%{_name_suffix}%{?_isa} = %{version}-%{release}
-Provides:       %{shortname}%{_name_ver_suffix} = %{version}-%{release}
-Provides:       %{shortname}%{_name_ver_suffix}%{?_isa} = %{version}-%{release}
+%{?altcc_reqmodules}
+%{?altcc_provide}
 
 
 %description
@@ -84,13 +54,8 @@ grids. You can also mix and match them in HDF5 files according to your needs.
 Summary: HDF5 development files
 Group: Development/Libraries
 Requires: zlib-devel
-%if 0%{?_with_mpi}
-Requires: %{_mpi_name_ver}-%{_cc_name_ver}-devel%{?_isa}
-%endif
-Provides: %{shortname}%{_name_suffix}-devel = %{version}-%{release}
-Provides: %{shortname}%{_name_suffix}-devel%{?_isa} = %{version}-%{release}
-Provides: %{shortname}%{_name_ver_suffix}-devel = %{version}-%{release}
-Provides: %{shortname}%{_name_ver_suffix}-devel%{?_isa} = %{version}-%{release}
+%{?altcc_reqmpi}
+%{?altcc:%altcc_provide devel} 
 
 %description devel
 HDF5 development headers and libraries.
@@ -100,13 +65,8 @@ HDF5 development headers and libraries.
 Summary: HDF5 static libraries
 Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
-%if 0%{?_with_mpi}
-Requires: %{_mpi_name_ver}-%{_cc_name_ver}-devel%{?_isa}
-%endif
-Provides: %{shortname}%{_name_suffix}-static = %{version}-%{release}
-Provides: %{shortname}%{_name_suffix}-static%{?_isa} = %{version}-%{release}
-Provides: %{shortname}%{_name_ver_suffix}-static = %{version}-%{release}
-Provides: %{shortname}%{_name_ver_suffix}-static%{?_isa} = %{version}-%{release}
+%{?altcc_reqmpi}
+%{?altcc:%altcc_provide static} 
 
 %description static
 HDF5 static libraries.
@@ -139,7 +99,7 @@ autoreconf -f -i
 mkdir build
 pushd build
 ln -s ../configure .
-%if !0%{?_with_mpi}
+%if !0%{?altcc_with_mpi}
 #Serial build
 %configure \
   %{configure_opts} \
@@ -170,11 +130,7 @@ mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
 cp -p debian/man/*.1 ${RPM_BUILD_ROOT}%{_mandir}/man1/
 rm ${RPM_BUILD_ROOT}%{_mandir}/man1/h5p[cf]c.1
 
-# AltCCRPMS
-# Make the environment-modules file
-mkdir -p %{buildroot}%{_modulefiledir}
-# Since we're doing our own substitution here, use our own definitions.
-sed -e 's#@PREFIX@#'%{_prefix}'#' -e 's#@LIB@#%{_lib}#' < %SOURCE3 > %{buildroot}%{_modulefiledir}/%{version}
+%{?altcc:%altcc_writemodule %SOURCE3}
 
 
 %check
@@ -190,12 +146,7 @@ make -C build check || :
 %files
 %doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-%dir %{_prefix}
-%dir %{_bindir}
-%dir %{_libdir}
-%dir %{_mandir}
-%dir %{_mandir}/man1
-%{_modulefiledir}
+%{?altcc:%altcc_files -m %{_bindir} %{_libdir} %{_mandir} %{_mandir}/man1}
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -211,12 +162,12 @@ make -C build check || :
 %{_bindir}/h5repart
 %{_bindir}/h5stat
 %{_bindir}/h5unjam
-%if 0%{?_with_mpi}
+%if 0%{?altcc_with_mpi}
 %{_bindir}/h5perf
 %{_bindir}/ph5diff
 %endif
 %{_libdir}/*.so.10*
-%if !0%{?_with_mpi}
+%if !0%{?altcc_with_mpi}
 %{_libdir}/libhdf5_cpp.so.12*
 %{_libdir}/libhdf5_hl_cpp.so.11*
 %endif
@@ -236,9 +187,8 @@ make -C build check || :
 %{_mandir}/man1/h5unjam.1*
 
 %files devel
-%dir %{_includedir}
-%dir %{_datadir}
-%if 0%{?_with_mpi}
+%{?altcc:%altcc_files %{_includedir} %{_datadir}}
+%if 0%{?altcc_with_mpi}
 %{_bindir}/h5pcc*
 %{_bindir}/h5pfc*
 %else
