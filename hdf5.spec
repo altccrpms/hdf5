@@ -1,5 +1,5 @@
 %global shortname hdf5
-%global ver 1.8.17
+%global ver 1.8.18
 %{?altcc_init:%altcc_init -n %{shortname} -v %{ver}}
 
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
@@ -11,13 +11,13 @@
 # You need to recompile all users of HDF5 for each version change
 Name: hdf5%{?altcc_pkg_suffix}
 Version: %{ver}
-Release: 1%{?dist}
+Release: 4%{?dist}
 Summary: A general purpose library and file format for storing scientific data
 License: BSD
 Group: System Environment/Libraries
 URL: http://www.hdfgroup.org/HDF5/
 
-Source0: http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-%{version}%{?snaprel}/src/hdf5-%{version}%{?snaprel}.tar.bz2
+Source0: https://support.hdfgroup.org/ftp/HDF5/current18/src/hdf5-%{version}%{?snaprel}.tar.bz2
 Source1: h5comp
 # For man pages
 Source2: http://ftp.us.debian.org/debian/pool/main/h/hdf5/hdf5_1.8.16+docs-8.debian.tar.xz
@@ -25,6 +25,8 @@ Source3: hdf5.module.in
 Patch0: hdf5-LD_LIBRARY_PATH.patch
 # Properly run MPI_Finalize() in t_pflush1
 Patch1: hdf5-mpi.patch
+# Fix compilation with -Werror=implicit-function-declaration
+Patch2: hdf5-implicit.patch
 # Fix long double conversions on ppc64le
 # https://bugzilla.redhat.com/show_bug.cgi?id=1078173
 Patch3: hdf5-ldouble-ppc64le.patch
@@ -76,6 +78,7 @@ HDF5 static libraries.
 %setup -q -a 2 -n hdf5-%{version}%{?snaprel}
 %patch0 -p1 -b .LD_LIBRARY_PATH
 %patch1 -p1 -b .mpi
+%patch2 -p1 -b .implicit
 %patch3 -p1 -b .ldouble-ppc64le
 # Force shared by default for compiler wrappers (bug #1266645)
 sed -i -e '/^STATIC_AVAILABLE=/s/=.*/=no/' */*/h5[cf]*.in
@@ -131,6 +134,8 @@ cp -p debian/man/*.1 ${RPM_BUILD_ROOT}%{_mandir}/man1/
 rm ${RPM_BUILD_ROOT}%{_mandir}/man1/h5p[cf]c.1
 
 %{?altcc:%altcc_writemodule %SOURCE3}
+%{?altcc:%altcc_doc}
+%{?altcc:%altcc_license}
 
 
 %check
@@ -144,9 +149,10 @@ make -C build check || :
 
 
 %files
-%doc COPYING MANIFEST README.txt release_docs/RELEASE.txt
+%{?altcc:%altcc_files -dlm %{_bindir} %{_libdir} %{_mandir} %{_mandir}/man1}
+%license COPYING
+%doc MANIFEST README.txt release_docs/RELEASE.txt
 %doc release_docs/HISTORY*.txt
-%{?altcc:%altcc_files -m %{_bindir} %{_libdir} %{_mandir} %{_mandir}/man1}
 %{_bindir}/gif2h5
 %{_bindir}/h52gif
 %{_bindir}/h5copy
@@ -168,7 +174,7 @@ make -C build check || :
 %endif
 %{_libdir}/*.so.10*
 %if !0%{?altcc_with_mpi}
-%{_libdir}/libhdf5_cpp.so.12*
+%{_libdir}/libhdf5_cpp.so.13*
 %{_libdir}/libhdf5_hl_cpp.so.11*
 %endif
 %{_mandir}/man1/gif2h5.1*
@@ -213,7 +219,24 @@ make -C build check || :
 
 
 %changelog
-* Fri May 13 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.17-1
+* Sat Jan 28 2017 Björn Esser <besser82@fedoraproject.org> - 1.8.18-4
+- Rebuilt for GCC-7
+
+* Fri Dec 30 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.18-3
+- Install MPI Fortran module into proper location (bug #1409229)
+- Use %%license
+
+* Thu Dec 8 2016 Dan Horák <dan[at]danny.cz> - 1.8.18-2
+- Enable openmpi for s390(x) on F>=26
+
+* Mon Dec 5 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.18-1
+- Update to 1.8.18
+- Add patch to fix build with -Werror=implicit-function-declaration
+
+* Fri Oct 21 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.17-2
+- Rebuild for openmpi 2.0
+
+* Wed Jun 29 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.17-1
 - Update to 1.8.17
 
 * Sun Mar 20 2016 Orion Poplawski <orion@cora.nwra.com> - 1.8.16-4
@@ -234,7 +257,7 @@ make -C build check || :
 
 * Fri Nov 20 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-9.patch1
 - Use MPI_FORTRAN_MOD_DIR to locate MPI Fortran module
- 
+
 * Fri Sep 25 2015 Orion Poplawski <orion@cora.nwra.com> - 1.8.15-8.patch1
 - Force shared by default for compiler wrappers (bug #1266645)
 
